@@ -228,8 +228,7 @@ def split_nodes_image(old_nodes):
 #         "to youtube", TextType.LINK, "https://www.youtube.com/@bootdotdev"
 #     ),
 # ]
-test_cases_results=
-[
+test_cases_results = [
     [
         TextNode("This is text with a link ", TextType.PLAIN, None),
         TextNode("to boot dev", TextType.ANCHOR, "https://www.boot.dev"),
@@ -239,8 +238,7 @@ test_cases_results=
         TextNode("to boot dev", TextType.ANCHOR, "https://www.boot.dev"),
         TextNode(" and ", TextType.PLAIN, None),
         TextNode("to youtube", TextType.ANCHOR, "https://www.youtube.com/@bootdotdev"),
-    ]
-
+    ],
     [
         TextNode("This is text with a link", TextType.PLAIN, None),
         TextNode("to boot dev", TextType.ALT, "https://www.boot.dev"),
@@ -250,26 +248,26 @@ test_cases_results=
         TextNode("to boot dev", TextType.ALT, "https://www.boot.dev"),
         TextNode(" and ", TextType.PLAIN, None),
         TextNode("to youtube", TextType.ALT, "https://www.youtube.com/@bootdotdev"),
-    ]
-
+    ],
     [
         TextNode("This is text with a link ", TextType.PLAIN, None),
         TextNode("to boot dev", TextType.ALT, "https://www.boot.dev"),
         TextNode(" and ", TextType.PLAIN, None),
         TextNode("to youtube", TextType.ANCHOR, "https://www.youtube.com/@bootdotdev"),
-    ]
+    ],
     [
         TextNode("This is ", TextType.PLAIN, None),
         TextNode("text", TextType.BOLD, None),
-        TextNode(" with an _italic_ word and a `code block` and ", TextType.PLAIN, None),
+        TextNode(
+            " with an _italic_ word and a `code block` and ", TextType.PLAIN, None
+        ),
         TextNode("text", TextType.BOLD, None),
         TextNode(
             "an ![obi wan image](https://i.imgur.com/fJRm4Vk.jpeg) and a [link](https://boot.dev)",
             TextType.PLAIN,
             None,
         ),
-    ]
-
+    ],
     [
         TextNode("This is **text** with an _italic_ word and a ", TextType.PLAIN, None),
         TextNode("code block", TextType.CODE, None),
@@ -280,10 +278,11 @@ test_cases_results=
         ),
         TextNode("second code block", TextType.CODE, None),
         TextNode(
-            "  a [link](https://boot.dev) **fgsdyafgas**   **text**", TextType.PLAIN, None
+            "  a [link](https://boot.dev) **fgsdyafgas**   **text**",
+            TextType.PLAIN,
+            None,
         ),
-    ]
-
+    ],
     [
         TextNode("This is ", TextType.PLAIN, None),
         TextNode("text", TextType.BOLD, None),
@@ -295,9 +294,8 @@ test_cases_results=
         TextNode("obi wan image", TextType.ALT, "https://i.imgur.com/fJRm4Vk.jpeg"),
         TextNode(" and a ", TextType.PLAIN, None),
         TextNode("link", TextType.ANCHOR, "https://boot.dev"),
-    ]
+    ],
 ]
-
 
 
 def text_to_textnodes(list_of_nodes):
@@ -307,6 +305,3 @@ def text_to_textnodes(list_of_nodes):
     italic_rm = split_nodes_italics(bold_rm)
     code_rm = split_nodes_code(italic_rm)
     return code_rm
-
-
-print(text_to_textnodes([node]))
