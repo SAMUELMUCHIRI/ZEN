@@ -1,7 +1,9 @@
 from multiprocessing import Value
 from typing_extensions import NoDefault
 import regex as re
+from htmlnode import HTMLNode
 from textnode import *
+from block import *
 
 node = TextNode(
     "This is **text** with an _italic_ word and a `code block` and an ![obi wan image](https://i.imgur.com/fJRm4Vk.jpeg) and a [link](https://boot.dev)",
@@ -305,3 +307,54 @@ def text_to_textnodes(list_of_nodes):
     italic_rm = split_nodes_italics(bold_rm)
     code_rm = split_nodes_code(italic_rm)
     return code_rm
+
+
+md = """
+    This is **bolded** paragraph
+
+    This is another paragraph with _italic_ text and `code` here
+    This is the same paragraph on a new line
+
+    - This is a list
+    - with items
+    """
+
+markdown_result = [
+    "This is **bolded** paragraph",
+    "This is another paragraph with _italic_ text and `code` here/nThis is the same paragraph on a new line",
+    "- This is a list/n- with items",
+]
+
+
+def markdown_to_blocks(markdown):
+    result = markdown.split("\n\n")
+    result_strip = map(lambda x: x.strip(), result)
+    rr = []
+    for i in result_strip:
+        y = i.split("\n")
+        d = map(lambda x: x.strip(), y)
+        rr.append("\n".join(d))
+    result_remove_empty = filter(lambda x: x != "", rr)
+    return list(result_remove_empty)
+
+
+def markdown_to_html_node(markdown):
+    blocks = markdown_to_blocks(markdown)
+    result = []
+    for i in blocks:
+        block_type = block_to_block_type(i)
+        match block_type:
+            case BlockType.p:
+                pb = HTMLNode(tag=None, value=i, children=None, props=None)
+
+
+test_mark = """
+This is **bolded** paragraph
+text in a p
+tag here
+
+This is another paragraph with _italic_ text and `code` here
+
+"""
+
+markdown_to_html_node(test_mark)
