@@ -1,7 +1,7 @@
 from multiprocessing import Value
 from typing_extensions import NoDefault
 import regex as re
-from htmlnode import HTMLNode
+from htmlnode import HTMLNode, ParentNode
 from textnode import *
 from block import *
 
@@ -319,11 +319,15 @@ md = """
     - with items
     """
 
-markdown_result = [
+markdown_result = """
     "This is **bolded** paragraph",
-    "This is another paragraph with _italic_ text and `code` here/nThis is the same paragraph on a new line",
-    "- This is a list/n- with items",
-]
+
+
+    "This is another paragraph with _italic_ text and `code` here\nThis is the same paragraph on a new line",
+
+
+    "- This is a list\n- with items",
+"""
 
 
 def markdown_to_blocks(markdown):
@@ -338,23 +342,110 @@ def markdown_to_blocks(markdown):
     return list(result_remove_empty)
 
 
+def text_to_children(string):
+    pre_result = []
+    pre_result.append(TextNode(string, TextType.PLAIN))
+
+    children = text_to_textnodes(pre_result)
+    result = []
+    for i in children:
+        result.append(text_node_to_html_node(i))
+    return result
+
+
 def markdown_to_html_node(markdown):
     blocks = markdown_to_blocks(markdown)
-    result = []
+    result = "<div>"
     for i in blocks:
         block_type = block_to_block_type(i)
         match block_type:
             case BlockType.p:
-                pb = HTMLNode(tag=None, value=i, children=None, props=None)
+                parent_node = ParentNode(tag="p", children=None)
+                if "\n" in i:
+                    children_node = text_to_children(i)
+                    sub_parent = ParentNode(tag="pre", children=children_node)
+                    # print(sub_parent.to_html())
+                    result = f"{result}<p>{sub_parent.to_html()}</p>"
+
+                else:
+                    children_node = text_to_children(i)
+                    parent_node.children = children_node
+
+                    result = f"{result}{parent_node.to_html()}"
+                """    h = "heading"
+                cd = "code"
+                qt = "quote"
+                ul = "unordered_list"
+                ol = "ordered_list"
+                """
+            case BlockType.cd:
+                parent_node = ParentNode(tag="code", children=None)
+                children_node = text_to_children(i)
+                parent_node.children = children_node
+                # print(parent_node.to_html())
+                result = f"{result}{parent_node.to_html()}"
+            case BlockType.qt:
+                parent_node = ParentNode(tag="q", children=None)
+                children_node = text_to_children(i)
+                parent_node.children = children_node
+                # print(parent_node.to_html())
+                result = f"{result}{parent_node.to_html()}"
+            case BlockType.ul:
+                parent_node = ParentNode(tag="ul", children=None)
+                children_node = text_to_children(i)
+                parent_node.children = children_node
+                # print(parent_node.to_html())
+                result = f"{result}{parent_node.to_html()}"
+
+            case BlockType.ol:
+                parent_node = ParentNode(tag="ol", children=None)
+                children_node = text_to_children(i)
+                parent_node.children = children_node
+                # print(parent_node.to_html())
+                result = f"{result}{parent_node.to_html()}"
+
+            case _:
+                parent_node = ParentNode(tag="p", children=None)
+                children_node = text_to_children(i)
+                parent_node.children = children_node
+                # print(parent_node.to_html())
+                result = f"{result}{parent_node.to_html()}"
+
+                # list of children in htmlNodes
+
+    return f"{result}</div>"
 
 
 test_mark = """
-This is **bolded** paragraph
-text in a p
-tag here
-
-This is another paragraph with _italic_ text and `code` here
-
+```
+This is text that _should_ remain
+the **same** even with inline stuff
+```
 """
+[
+    ["This is **bolded** paragraph", "text in a p", "tag here"],
+    ["This is another paragraph with _italic_ text and `code` here"],
+]
+"""
+[
+    htmlnode(p,None,
+        [
+            htmlnode(None,This is ,None,None),
+            htmlnode(b,bolded,None,None),
+            htmlnode(None, paragraph,None,None),
+            htmlnode(None,text in a p,None,None),
+            htmlnode(None,tag here,None,None)
+        ],None)
+    htmlnode(p,None,
+        [
+            htmlnode(None,This is another paragraph with ,None,None),
+            htmlnode(i,italic,None,None),
+            htmlnode(None, text and ,None,None),
+            htmlnode(code,code,None,None),
+            htmlnode(None, here,None,None)
+        ],None)
+]
+"""
+# print(list(map(lambda x: x.split("\n"), markdown_to_blocks(test_mark))))
 
-markdown_to_html_node(test_mark)
+print(markdown_to_html_node(markdown_result))
