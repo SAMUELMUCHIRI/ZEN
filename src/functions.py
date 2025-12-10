@@ -453,8 +453,9 @@ the **same** even with inline stuff
         ],None)
 ]
 """
-# print(list(map(lambda x: x.split("\n"), markdown_to_blocks(test_mark))))
+
 md = """
+# Title
     ```
     This is text that _should_ remain
     the **same** even with inline stuff
@@ -462,8 +463,11 @@ md = """
     """
 
 
-# node = markdown_to_html_node(test_mark)
-# print(node.to_html())
-# html = node.to_html()
-# print(html)
-# print(markdown_to_html_node(md))
+def extract_title(markdown):
+    matches = re.findall(r"(?:(?<=\n)|^)#(?!#)\s+.*", markdown)
+    if len(matches) == 0:
+        return None
+    return matches[0].strip("# ")
+
+
+print(extract_title(md))
