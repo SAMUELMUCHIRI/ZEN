@@ -8,6 +8,7 @@ class BlockType(Enum):
     qt = "quote"
     ul = "unordered_list"
     ol = "ordered_list"
+    pre = "pre"
 
 
 def is_member(value):

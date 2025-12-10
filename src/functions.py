@@ -1,9 +1,11 @@
 from multiprocessing import Value
-from typing_extensions import NoDefault
+
 import regex as re
+from typing_extensions import NoDefault
+
+from block import *
 from htmlnode import HTMLNode, ParentNode
 from textnode import *
-from block import *
 
 node = TextNode(
     "This is **text** with an _italic_ word and a `code block` and an ![obi wan image](https://i.imgur.com/fJRm4Vk.jpeg) and a [link](https://boot.dev)",
@@ -83,6 +85,7 @@ def split_nodes_bold(old_nodes):
 
 
 def split_nodes_code(old_nodes):
+    # print(f"Old nodes are {old_nodes}")
     result = []
     for nodes_in in old_nodes:
         if nodes_in.text_type == TextType.PLAIN:
@@ -106,6 +109,7 @@ def split_nodes_code(old_nodes):
                     else:
                         add = True
                         count_bold = 0
+
                         result.append(TextNode(codes[count], TextType.CODE))
                         count += 1
                 else:
@@ -122,6 +126,7 @@ def split_nodes_code(old_nodes):
 
 def split_nodes_italics(old_nodes):
     result = []
+    # print(old_nodes)
     for nodes_in in old_nodes:
         if nodes_in.text_type == TextType.PLAIN:
             codes = extract_markdown_italic(nodes_in.text)
@@ -326,7 +331,7 @@ markdown_result = """
     "This is another paragraph with _italic_ text and `code` here\nThis is the same paragraph on a new line",
 
 
-    "- This is a list\n- with items",
+    "- This is a list\n-with items",
 """
 
 
@@ -344,83 +349,85 @@ def markdown_to_blocks(markdown):
 
 def text_to_children(string):
     pre_result = []
-    pre_result.append(TextNode(string, TextType.PLAIN))
+    if string.startswith("```") and string.endswith("```"):
+        new_string = string[3:-3]
+        pre_result.append(TextNode(new_string, TextType.CODE))
+    else:
+        pre_result.append(TextNode(string, TextType.PLAIN))
 
     children = text_to_textnodes(pre_result)
     result = []
     for i in children:
         result.append(text_node_to_html_node(i))
+
     return result
 
 
 def markdown_to_html_node(markdown):
+    main = []
     blocks = markdown_to_blocks(markdown)
-    result = "<div>"
+
+    result = ParentNode(tag="div", children=None)
+
     for i in blocks:
         block_type = block_to_block_type(i)
         match block_type:
             case BlockType.p:
                 parent_node = ParentNode(tag="p", children=None)
-                if "\n" in i:
-                    children_node = text_to_children(i)
-                    sub_parent = ParentNode(tag="pre", children=children_node)
-                    # print(sub_parent.to_html())
-                    result = f"{result}<p>{sub_parent.to_html()}</p>"
-
-                else:
-                    children_node = text_to_children(i)
-                    parent_node.children = children_node
-
-                    result = f"{result}{parent_node.to_html()}"
-                """    h = "heading"
-                cd = "code"
-                qt = "quote"
-                ul = "unordered_list"
-                ol = "ordered_list"
-                """
-            case BlockType.cd:
-                parent_node = ParentNode(tag="code", children=None)
                 children_node = text_to_children(i)
                 parent_node.children = children_node
-                # print(parent_node.to_html())
-                result = f"{result}{parent_node.to_html()}"
+                main.append(parent_node)
+
+            case BlockType.cd:
+                grand_node = ParentNode(tag="pre", children=None)
+                parent_node = ParentNode(tag="code", children=None)
+                children_node = text_to_children(i)
+                # print(f"full code {i} ..")
+                # print(children_node)
+                parent_node.children = children_node
+                grand_node.children = [parent_node]
+                # print(parent_node)
+                main.append(grand_node)
+
             case BlockType.qt:
                 parent_node = ParentNode(tag="q", children=None)
                 children_node = text_to_children(i)
                 parent_node.children = children_node
-                # print(parent_node.to_html())
-                result = f"{result}{parent_node.to_html()}"
+
+                main.append(parent_node)
+
             case BlockType.ul:
                 parent_node = ParentNode(tag="ul", children=None)
                 children_node = text_to_children(i)
                 parent_node.children = children_node
-                # print(parent_node.to_html())
-                result = f"{result}{parent_node.to_html()}"
+
+                main.append(parent_node)
 
             case BlockType.ol:
                 parent_node = ParentNode(tag="ol", children=None)
                 children_node = text_to_children(i)
                 parent_node.children = children_node
-                # print(parent_node.to_html())
-                result = f"{result}{parent_node.to_html()}"
+
+                main.append(parent_node)
 
             case _:
                 parent_node = ParentNode(tag="p", children=None)
                 children_node = text_to_children(i)
                 parent_node.children = children_node
-                # print(parent_node.to_html())
-                result = f"{result}{parent_node.to_html()}"
 
-                # list of children in htmlNodes
+                main.append(parent_node)
 
-    return f"{result}</div>"
+    result.children = main
+    return result
 
 
 test_mark = """
+
 ```
 This is text that _should_ remain
 the **same** even with inline stuff
 ```
+
 """
 [
     ["This is **bolded** paragraph", "text in a p", "tag here"],
@@ -447,5 +454,16 @@ the **same** even with inline stuff
 ]
 """
 # print(list(map(lambda x: x.split("\n"), markdown_to_blocks(test_mark))))
+md = """
+    ```
+    This is text that _should_ remain
+    the **same** even with inline stuff
+    ```
+    """
 
-print(markdown_to_html_node(markdown_result))
+
+# node = markdown_to_html_node(test_mark)
+# print(node.to_html())
+# html = node.to_html()
+# print(html)
+# print(markdown_to_html_node(md))
