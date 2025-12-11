@@ -67,7 +67,20 @@ class TestHTMLNode(unittest.TestCase):
         )
         new_nodes = text_to_textnodes([node])
         self.assertListEqual(
-            test_cases_results[-1],
+            [
+                TextNode("This is ", TextType.PLAIN, None),
+                TextNode("text", TextType.BOLD, None),
+                TextNode(" with an ", TextType.PLAIN, None),
+                TextNode("italic", TextType.ITALIC, None),
+                TextNode(" word and a ", TextType.PLAIN, None),
+                TextNode("code block", TextType.CODE, None),
+                TextNode(" and an ", TextType.PLAIN, None),
+                TextNode(
+                    "obi wan image", TextType.ALT, "https://i.imgur.com/fJRm4Vk.jpeg"
+                ),
+                TextNode(" and a ", TextType.PLAIN, None),
+                TextNode("link", TextType.ANCHOR, "https://boot.dev"),
+            ],
             new_nodes,
         )
 

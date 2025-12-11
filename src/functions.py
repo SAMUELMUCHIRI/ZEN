@@ -1,10 +1,13 @@
+import os
 from multiprocessing import Value
+from threading import ExceptHookArgs
 
 import regex as re
 from typing_extensions import NoDefault
 
 from block import *
 from htmlnode import HTMLNode, ParentNode
+from testdata import *
 from textnode import *
 
 node = TextNode(
@@ -170,6 +173,7 @@ def split_nodes_link(old_nodes):
     for nodes_in in old_nodes:
         if nodes_in.text_type == TextType.PLAIN:
             links = extract_markdown_link(nodes_in.text)
+            # print(if (len(links) > 0) )
             len_links = len(links)
             text = ""
             add = True
@@ -197,6 +201,22 @@ def split_nodes_link(old_nodes):
     return result
 
 
+sss = [
+    TextNode("Want to get in touch?", TextType.PLAIN, None),
+    TextNode("Contact me here", TextType.ANCHOR, "/contact"),
+    TextNode(".", TextType.PLAIN, None),
+    TextNode("This site was generated with a custom-built", TextType.PLAIN, None),
+    TextNode(
+        "static site generator",
+        TextType.ANCHOR,
+        "https://www.boot.dev/courses/build-static-site-generator-python",
+    ),
+    TextNode(" from the course on ", TextType.PLAIN, None),
+    TextNode("Boot.dev", TextType.ANCHOR, "https://www.boot.dev"),
+    TextNode(".", TextType.PLAIN, None),
+]
+
+
 def split_nodes_image(old_nodes):
     result = []
     first_d = ""
@@ -212,97 +232,24 @@ def split_nodes_image(old_nodes):
             if nodes_in.text[i] == "!":
                 first_d = "!"
                 add = False
-                result.append(TextNode(text, TextType.PLAIN))
+                if len(text) > 0:
+                    result.append(TextNode(text, TextType.PLAIN))
                 text = ""
             if add == True:
                 text = f"{text}{nodes_in.text[i]}"
             if (nodes_in.text[i] == ")") and (first_d == "!"):
                 add = True
-                result.append(TextNode(links[count][0], TextType.ALT, links[count][1]))
+                if len(links) == 1:
+                    result.append(
+                        TextNode(links[count][0], TextType.ALT, links[count][1])
+                    )
+
                 count += 1
                 first_d = ""
         if text != "":
             result.append(TextNode(text, TextType.PLAIN))
+
     return result
-
-
-# new_nodes = split_nodes_link([node])
-# [
-#     TextNode("This is text with a link ", TextType.TEXT),
-#     TextNode("to boot dev", TextType.LINK, "https://www.boot.dev"),
-#     TextNode(" and ", TextType.TEXT),
-#     TextNode(
-#         "to youtube", TextType.LINK, "https://www.youtube.com/@bootdotdev"
-#     ),
-# ]
-test_cases_results = [
-    [
-        TextNode("This is text with a link ", TextType.PLAIN, None),
-        TextNode("to boot dev", TextType.ANCHOR, "https://www.boot.dev"),
-        TextNode(" and ", TextType.PLAIN, None),
-        TextNode("to youtube", TextType.ANCHOR, "https://www.youtube.com/@bootdotdev"),
-        TextNode("This is text with a link ", TextType.PLAIN, None),
-        TextNode("to boot dev", TextType.ANCHOR, "https://www.boot.dev"),
-        TextNode(" and ", TextType.PLAIN, None),
-        TextNode("to youtube", TextType.ANCHOR, "https://www.youtube.com/@bootdotdev"),
-    ],
-    [
-        TextNode("This is text with a link", TextType.PLAIN, None),
-        TextNode("to boot dev", TextType.ALT, "https://www.boot.dev"),
-        TextNode(" and ", TextType.PLAIN, None),
-        TextNode("to youtube", TextType.ALT, "https://www.youtube.com/@bootdotdev"),
-        TextNode("This is text with a link ", TextType.PLAIN, None),
-        TextNode("to boot dev", TextType.ALT, "https://www.boot.dev"),
-        TextNode(" and ", TextType.PLAIN, None),
-        TextNode("to youtube", TextType.ALT, "https://www.youtube.com/@bootdotdev"),
-    ],
-    [
-        TextNode("This is text with a link ", TextType.PLAIN, None),
-        TextNode("to boot dev", TextType.ALT, "https://www.boot.dev"),
-        TextNode(" and ", TextType.PLAIN, None),
-        TextNode("to youtube", TextType.ANCHOR, "https://www.youtube.com/@bootdotdev"),
-    ],
-    [
-        TextNode("This is ", TextType.PLAIN, None),
-        TextNode("text", TextType.BOLD, None),
-        TextNode(
-            " with an _italic_ word and a `code block` and ", TextType.PLAIN, None
-        ),
-        TextNode("text", TextType.BOLD, None),
-        TextNode(
-            "an ![obi wan image](https://i.imgur.com/fJRm4Vk.jpeg) and a [link](https://boot.dev)",
-            TextType.PLAIN,
-            None,
-        ),
-    ],
-    [
-        TextNode("This is **text** with an _italic_ word and a ", TextType.PLAIN, None),
-        TextNode("code block", TextType.CODE, None),
-        TextNode(
-            " and **text** an ![obi wan image](https://i.imgur.com/fJRm4Vk.jpeg) and ",
-            TextType.PLAIN,
-            None,
-        ),
-        TextNode("second code block", TextType.CODE, None),
-        TextNode(
-            "  a [link](https://boot.dev) **fgsdyafgas**   **text**",
-            TextType.PLAIN,
-            None,
-        ),
-    ],
-    [
-        TextNode("This is ", TextType.PLAIN, None),
-        TextNode("text", TextType.BOLD, None),
-        TextNode(" with an ", TextType.PLAIN, None),
-        TextNode("italic", TextType.ITALIC, None),
-        TextNode(" word and a ", TextType.PLAIN, None),
-        TextNode("code block", TextType.CODE, None),
-        TextNode(" and an ", TextType.PLAIN, None),
-        TextNode("obi wan image", TextType.ALT, "https://i.imgur.com/fJRm4Vk.jpeg"),
-        TextNode(" and a ", TextType.PLAIN, None),
-        TextNode("link", TextType.ANCHOR, "https://boot.dev"),
-    ],
-]
 
 
 def text_to_textnodes(list_of_nodes):
@@ -311,6 +258,9 @@ def text_to_textnodes(list_of_nodes):
     bold_rm = split_nodes_bold(links_rm)
     italic_rm = split_nodes_italics(bold_rm)
     code_rm = split_nodes_code(italic_rm)
+
+    print(f"To text nodes {code_rm}")
+
     return code_rm
 
 
@@ -335,9 +285,29 @@ markdown_result = """
 """
 
 
+def list_method(i, parent_tag, delimiter):
+    parent_node = ParentNode(tag=f"{parent_tag}", children=None)
+
+    list_items = i.split(f"{delimiter}")
+    list_node_list = []
+    for list_item in list_items:
+        if len(list_item) > 0:
+            if list_item.endswith("\n"):
+                list_item = list_item[:-1]
+            if parent_tag == "ol":
+                list_item = list_item[1:]
+            list_node = ParentNode(tag="li", children=None)
+            list_node.children = text_to_children(list_item)
+            list_node_list.append(list_node)
+
+    parent_node.children = list_node_list
+    return parent_node
+
+
 def markdown_to_blocks(markdown):
     result = markdown.split("\n\n")
     result_strip = map(lambda x: x.strip(), result)
+
     rr = []
     for i in result_strip:
         y = i.split("\n")
@@ -366,48 +336,45 @@ def text_to_children(string):
 def markdown_to_html_node(markdown):
     main = []
     blocks = markdown_to_blocks(markdown)
+    print(blocks)
 
     result = ParentNode(tag="div", children=None)
 
     for i in blocks:
         block_type = block_to_block_type(i)
+        print(f"Block Type: {block_type}")
         match block_type:
             case BlockType.p:
                 parent_node = ParentNode(tag="p", children=None)
                 children_node = text_to_children(i)
+                print(f"Children Node {children_node}")
                 parent_node.children = children_node
                 main.append(parent_node)
 
             case BlockType.cd:
-                grand_node = ParentNode(tag="pre", children=None)
-                parent_node = ParentNode(tag="code", children=None)
+                parent_node = ParentNode(tag="pre", children=None)
                 children_node = text_to_children(i)
-                # print(f"full code {i} ..")
-                # print(children_node)
                 parent_node.children = children_node
-                grand_node.children = [parent_node]
-                # print(parent_node)
-                main.append(grand_node)
+                main.append(parent_node)
 
             case BlockType.qt:
-                parent_node = ParentNode(tag="q", children=None)
-                children_node = text_to_children(i)
+                parent_node = ParentNode(tag="blockquote", children=None)
+                finalstring = ""
+                for j in i.split(">"):
+                    if len(j) > 0:
+                        formated = j.replace("\n", "<br>")
+                        finalstring = f"{finalstring}{formated}"
+                children_node = text_to_children(finalstring)
                 parent_node.children = children_node
 
                 main.append(parent_node)
 
             case BlockType.ul:
-                parent_node = ParentNode(tag="ul", children=None)
-                children_node = text_to_children(i)
-                parent_node.children = children_node
-
+                parent_node = list_method(i, "ul", "- ")
                 main.append(parent_node)
 
             case BlockType.ol:
-                parent_node = ParentNode(tag="ol", children=None)
-                children_node = text_to_children(i)
-                parent_node.children = children_node
-
+                parent_node = list_method(i, "ol", "\n")
                 main.append(parent_node)
 
             case _:
@@ -421,53 +388,104 @@ def markdown_to_html_node(markdown):
     return result
 
 
-test_mark = """
-
-```
-This is text that _should_ remain
-the **same** even with inline stuff
-```
-
-"""
-[
-    ["This is **bolded** paragraph", "text in a p", "tag here"],
-    ["This is another paragraph with _italic_ text and `code` here"],
-]
-"""
-[
-    htmlnode(p,None,
-        [
-            htmlnode(None,This is ,None,None),
-            htmlnode(b,bolded,None,None),
-            htmlnode(None, paragraph,None,None),
-            htmlnode(None,text in a p,None,None),
-            htmlnode(None,tag here,None,None)
-        ],None)
-    htmlnode(p,None,
-        [
-            htmlnode(None,This is another paragraph with ,None,None),
-            htmlnode(i,italic,None,None),
-            htmlnode(None, text and ,None,None),
-            htmlnode(code,code,None,None),
-            htmlnode(None, here,None,None)
-        ],None)
-]
-"""
-
-md = """
-# Title
-    ```
-    This is text that _should_ remain
-    the **same** even with inline stuff
-    ```
-    """
-
-
 def extract_title(markdown):
     matches = re.findall(r"(?:(?<=\n)|^)#(?!#)\s+.*", markdown)
     if len(matches) == 0:
-        return None
+        raise Exception("No title found")
     return matches[0].strip("# ")
 
 
-print(extract_title(md))
+"""
+
+Read the markdown file at from_path and store the contents in a variable.
+Read the template file at template_path and store the contents in a variable.
+Use your markdown_to_html_node function and .to_html() method to convert the markdown file to an HTML string.
+Use the extract_title function to grab the title of the page.
+Replace the {{ Title }} and {{ Content }} placeholders in the template with the HTML and title you generated.
+Write the new full HTML page to a file at dest_path. Be sure to create any necessary directories if they don't exist.
+"""
+
+
+def read_file(path):
+    with open(path, "r") as f:
+        return f.read()
+
+
+def write_file(path, content):
+    with open(path, "w") as f:
+        f.write(content)
+
+
+def generate_page(from_path, template_path, dest_path):
+    print(f"Generating page from {from_path} to {dest_path} using {template_path}")
+    markdown = read_file(from_path)
+    template = read_file(template_path)
+    html = markdown_to_html_node(markdown).to_html()
+    title = extract_title(markdown)
+    html = template.replace("{{ Title }}", title).replace("{{ Content }}", html)
+    if os.path.exists(os.path.dirname(dest_path)):
+        write_file(dest_path, html)
+    else:
+        os.makedirs(os.path.dirname(dest_path))
+        write_file(dest_path, html)
+
+
+"""
+cwd = os.getcwd()
+from_path = f"{cwd}/content/index.md"
+template_path = f"{cwd}/template.html"
+dest_path = f"{cwd}/public/index.html"
+generate_page(from_path, template_path, dest_path)
+"""
+"""
+
+test = [TextNode("![JRR Tolkien sitting](/images/tolkien.png)", TextType.PLAIN, None)]
+print(split_nodes_image(test))
+"""
+print(markdown_to_html_node(test_markdown).to_html())
+"""
+print(
+    text_to_textnodes(
+        [
+            TextNode(
+                "![JRR Tolkien sitting](/images/tolkien.png)",
+                TextType.PLAIN,
+                None,
+            )
+        ]
+    )
+)
+"""
+
+"""
+[TextNode(# Tolkien Fan Club,TextType.PLAIN,None)]
+[TextNode(JRR Tolkien sitting,TextType.ALT,/images/tolkien.png)]
+[TextNode(Here's the deal, ,TextType.PLAIN,None), TextNode(I like Tolkien,TextType.BOLD,None), TextNode(.,TextType.PLAIN,None)]
+[TextNode( "I am in fact a Hobbit in all but size."<br><br> -- J.R.R. Tolkien,TextType.PLAIN,None)]
+[TextNode(## Blog posts,TextType.PLAIN,None)]
+[TextNode(Why Glorfindel is More Impressive than Legolas,TextType.ANCHOR,/blog/glorfindel)]
+[TextNode(Why Tom Bombadil Was a Mistake,TextType.ANCHOR,/blog/tom)]
+[TextNode(The Unparalleled Majesty of "The Lord of the Rings",TextType.ANCHOR,/blog/majesty)]
+[TextNode(## Reasons I like Tolkien,TextType.PLAIN,None)]
+[TextNode(You can spend years studying the legendarium and still not understand its depths,TextType.PLAIN,None)]
+[TextNode(It can be enjoyed by children and adults alike,TextType.PLAIN,None)]
+[TextNode(Disney ,TextType.PLAIN,None), TextNode(didn't ruin it,TextType.ITALIC,None), TextNode( (okay, but Amazon might have),TextType.PLAIN,None)]
+[TextNode(It created an entirely new genre of fantasy,TextType.PLAIN,None)]
+[TextNode(## My favorite characters (in order),TextType.PLAIN,None)]
+[TextNode(. Gandalf,TextType.PLAIN,None)]
+[TextNode(. Bilbo,TextType.PLAIN,None)]
+[TextNode(. Sam,TextType.PLAIN,None)]
+[TextNode(. Glorfindel,TextType.PLAIN,None)]
+[TextNode(. Galadriel,TextType.PLAIN,None)]
+[TextNode(. Elrond,TextType.PLAIN,None)]
+[TextNode(. Thorin,TextType.PLAIN,None)]
+[TextNode(. Sauron,TextType.PLAIN,None)]
+[TextNode(. Aragorn,TextType.PLAIN,None)]
+[TextNode(Here's what ,TextType.PLAIN,None), TextNode(elflang,TextType.CODE,None), TextNode( looks like (the perfect coding language):,TextType.PLAIN,None)]
+[TextNode(
+func main(){
+fmt.Println("Aiya, Ambar,TextType.PLAIN,None), TextNode(
+}
+,TextType.PLAIN,None)]
+[TextNode(Want to get in touch? ,TextType.PLAIN,None), TextNode(Contact me here,TextType.ANCHOR,/contact), TextNode(.,TextType.PLAIN,None)]
+[TextNode(This site was generated with a custom-built ,TextType.PLAIN,None), TextNode(static site generator,TextType.ANCHOR,https://www.boot.dev/courses/build-static-site-generator-python), TextNode( from the course on ,TextType.PLAIN,None), TextNode(Boot.dev,TextType.ANCHOR,https://www.boot.dev), TextNode(.,TextType.PLAIN,None)]"""

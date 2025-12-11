@@ -13,6 +13,7 @@ class HTMLNode:
 
     def props_to_html(self):
         result = ""
+        print("trying to convert props to html")
         for key, value in self.props.items():
             new_string = f'{key}="{value}" '
             result = f"{result}{new_string}"
@@ -52,5 +53,5 @@ class ParentNode(HTMLNode):
             raise ValueError("Does not have a tag")
         if self.children is None:
             raise ValueError("Missing Children")
-
+        print(f"<{self.tag}>{self.__iter__()}</{self.tag}>")
         return f"<{self.tag}>{self.__iter__()}</{self.tag}>"
