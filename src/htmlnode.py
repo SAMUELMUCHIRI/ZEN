@@ -13,7 +13,6 @@ class HTMLNode:
 
     def props_to_html(self):
         result = ""
-        print("trying to convert props to html")
         for key, value in self.props.items():
             new_string = f'{key}="{value}" '
             result = f"{result}{new_string}"
@@ -25,16 +24,18 @@ class HTMLNode:
 
 class LeafNode(HTMLNode):
     def __init__(self, tag, value, props=None):
-        super().__init__(tag, value, props)
+        super().__init__(tag=tag, value=value, props=props)
 
     def to_html(self):
-        if self.value == None:
-            raise ValueError("All leaf nodes must have a value")
-        if self.tag == None:
-            return self.value
-        if self.props == None:
-            return f"<{self.tag}>{self.value}</{self.tag}>"
-        return f"<{self.tag} {self.props_to_html}>{self.value}</{self.tag}>"
+        if self.tag != "img":
+            if self.value == None:
+                raise ValueError("All leaf nodes must have a value")
+            if self.tag == None:
+                return self.value
+            if self.props == None:
+                return f"<{self.tag}>{self.value}</{self.tag}>"
+            return f"<{self.tag} {super().props_to_html()}>{self.value}</{self.tag}>"
+        return f"<{self.tag} {super().props_to_html()}>"
 
 
 class ParentNode(HTMLNode):
@@ -53,5 +54,5 @@ class ParentNode(HTMLNode):
             raise ValueError("Does not have a tag")
         if self.children is None:
             raise ValueError("Missing Children")
-        print(f"<{self.tag}>{self.__iter__()}</{self.tag}>")
+
         return f"<{self.tag}>{self.__iter__()}</{self.tag}>"

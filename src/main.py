@@ -1,15 +1,15 @@
 import os
 import shutil
 
+from functions import generate_page
+
 
 def main():
-    public_path = f"{os.getcwd()}/public"
-    static_path = f"{os.getcwd()}/static"
-    print(public_path)
-    print(static_path)
+    cwd = os.getcwd()
+    public_path = f"{cwd}/public"
+    static_path = f"{cwd}/static"
     if os.path.exists(public_path):
         shutil.rmtree(path=public_path, ignore_errors=False)
-
     os.mkdir(public_path)
     shutil.copytree(
         src=static_path,
@@ -20,6 +20,11 @@ def main():
         ignore_dangling_symlinks=False,
         dirs_exist_ok=True,
     )
+
+    from_path = f"{cwd}/content/index.md"
+    template_path = f"{cwd}/template.html"
+    dest_path = f"{cwd}/public/index.html"
+    generate_page(from_path, template_path, dest_path)
 
 
 main()

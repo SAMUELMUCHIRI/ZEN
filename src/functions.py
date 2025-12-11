@@ -259,8 +259,6 @@ def text_to_textnodes(list_of_nodes):
     italic_rm = split_nodes_italics(bold_rm)
     code_rm = split_nodes_code(italic_rm)
 
-    print(f"To text nodes {code_rm}")
-
     return code_rm
 
 
@@ -295,7 +293,7 @@ def list_method(i, parent_tag, delimiter):
             if list_item.endswith("\n"):
                 list_item = list_item[:-1]
             if parent_tag == "ol":
-                list_item = list_item[1:]
+                list_item = list_item[2:].strip()
             list_node = ParentNode(tag="li", children=None)
             list_node.children = text_to_children(list_item)
             list_node_list.append(list_node)
@@ -336,18 +334,17 @@ def text_to_children(string):
 def markdown_to_html_node(markdown):
     main = []
     blocks = markdown_to_blocks(markdown)
-    print(blocks)
 
     result = ParentNode(tag="div", children=None)
 
     for i in blocks:
         block_type = block_to_block_type(i)
-        print(f"Block Type: {block_type}")
+
         match block_type:
             case BlockType.p:
                 parent_node = ParentNode(tag="p", children=None)
                 children_node = text_to_children(i)
-                print(f"Children Node {children_node}")
+
                 parent_node.children = children_node
                 main.append(parent_node)
 
@@ -366,6 +363,7 @@ def markdown_to_html_node(markdown):
                         finalstring = f"{finalstring}{formated}"
                 children_node = text_to_children(finalstring)
                 parent_node.children = children_node
+                print(parent_node)
 
                 main.append(parent_node)
 
@@ -395,15 +393,11 @@ def extract_title(markdown):
     return matches[0].strip("# ")
 
 
-"""
-
-Read the markdown file at from_path and store the contents in a variable.
-Read the template file at template_path and store the contents in a variable.
-Use your markdown_to_html_node function and .to_html() method to convert the markdown file to an HTML string.
-Use the extract_title function to grab the title of the page.
-Replace the {{ Title }} and {{ Content }} placeholders in the template with the HTML and title you generated.
-Write the new full HTML page to a file at dest_path. Be sure to create any necessary directories if they don't exist.
-"""
+def extract_h2(markdown):
+    matches = re.findall(r"(?:(?<=\n)|^)##(?!#)\s+.*", markdown)
+    if len(matches) == 0:
+        return False
+    return list(map(lambda x: x.strip("## "), matches))
 
 
 def read_file(path):
@@ -422,70 +416,21 @@ def generate_page(from_path, template_path, dest_path):
     template = read_file(template_path)
     html = markdown_to_html_node(markdown).to_html()
     title = extract_title(markdown)
-    html = template.replace("{{ Title }}", title).replace("{{ Content }}", html)
+    h2 = extract_h2(markdown)
+    if h2:
+        for h2_item in h2:
+            initial_h2 = f"## {h2_item}"
+            new_h2 = f"<h2>{h2_item}</h2>"
+            html = html.replace(initial_h2, new_h2)
+    initial_title = f"# {title}"
+    new_heading = f"<h1>{title}</h1>"
+    html = (
+        template.replace("{{ Title }}", title)
+        .replace("{{ Content }}", html)
+        .replace(initial_title, new_heading)
+    )
     if os.path.exists(os.path.dirname(dest_path)):
         write_file(dest_path, html)
     else:
         os.makedirs(os.path.dirname(dest_path))
         write_file(dest_path, html)
-
-
-"""
-cwd = os.getcwd()
-from_path = f"{cwd}/content/index.md"
-template_path = f"{cwd}/template.html"
-dest_path = f"{cwd}/public/index.html"
-generate_page(from_path, template_path, dest_path)
-"""
-"""
-
-test = [TextNode("![JRR Tolkien sitting](/images/tolkien.png)", TextType.PLAIN, None)]
-print(split_nodes_image(test))
-"""
-print(markdown_to_html_node(test_markdown).to_html())
-"""
-print(
-    text_to_textnodes(
-        [
-            TextNode(
-                "![JRR Tolkien sitting](/images/tolkien.png)",
-                TextType.PLAIN,
-                None,
-            )
-        ]
-    )
-)
-"""
-
-"""
-[TextNode(# Tolkien Fan Club,TextType.PLAIN,None)]
-[TextNode(JRR Tolkien sitting,TextType.ALT,/images/tolkien.png)]
-[TextNode(Here's the deal, ,TextType.PLAIN,None), TextNode(I like Tolkien,TextType.BOLD,None), TextNode(.,TextType.PLAIN,None)]
-[TextNode( "I am in fact a Hobbit in all but size."<br><br> -- J.R.R. Tolkien,TextType.PLAIN,None)]
-[TextNode(## Blog posts,TextType.PLAIN,None)]
-[TextNode(Why Glorfindel is More Impressive than Legolas,TextType.ANCHOR,/blog/glorfindel)]
-[TextNode(Why Tom Bombadil Was a Mistake,TextType.ANCHOR,/blog/tom)]
-[TextNode(The Unparalleled Majesty of "The Lord of the Rings",TextType.ANCHOR,/blog/majesty)]
-[TextNode(## Reasons I like Tolkien,TextType.PLAIN,None)]
-[TextNode(You can spend years studying the legendarium and still not understand its depths,TextType.PLAIN,None)]
-[TextNode(It can be enjoyed by children and adults alike,TextType.PLAIN,None)]
-[TextNode(Disney ,TextType.PLAIN,None), TextNode(didn't ruin it,TextType.ITALIC,None), TextNode( (okay, but Amazon might have),TextType.PLAIN,None)]
-[TextNode(It created an entirely new genre of fantasy,TextType.PLAIN,None)]
-[TextNode(## My favorite characters (in order),TextType.PLAIN,None)]
-[TextNode(. Gandalf,TextType.PLAIN,None)]
-[TextNode(. Bilbo,TextType.PLAIN,None)]
-[TextNode(. Sam,TextType.PLAIN,None)]
-[TextNode(. Glorfindel,TextType.PLAIN,None)]
-[TextNode(. Galadriel,TextType.PLAIN,None)]
-[TextNode(. Elrond,TextType.PLAIN,None)]
-[TextNode(. Thorin,TextType.PLAIN,None)]
-[TextNode(. Sauron,TextType.PLAIN,None)]
-[TextNode(. Aragorn,TextType.PLAIN,None)]
-[TextNode(Here's what ,TextType.PLAIN,None), TextNode(elflang,TextType.CODE,None), TextNode( looks like (the perfect coding language):,TextType.PLAIN,None)]
-[TextNode(
-func main(){
-fmt.Println("Aiya, Ambar,TextType.PLAIN,None), TextNode(
-}
-,TextType.PLAIN,None)]
-[TextNode(Want to get in touch? ,TextType.PLAIN,None), TextNode(Contact me here,TextType.ANCHOR,/contact), TextNode(.,TextType.PLAIN,None)]
-[TextNode(This site was generated with a custom-built ,TextType.PLAIN,None), TextNode(static site generator,TextType.ANCHOR,https://www.boot.dev/courses/build-static-site-generator-python), TextNode( from the course on ,TextType.PLAIN,None), TextNode(Boot.dev,TextType.ANCHOR,https://www.boot.dev), TextNode(.,TextType.PLAIN,None)]"""
