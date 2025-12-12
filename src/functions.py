@@ -364,7 +364,7 @@ def write_file(path, content):
         f.write(content)
 
 
-def generate_page(from_path, template_path, dest_path):
+def generate_page(from_path, template_path, dest_path, base_path="/"):
     # print(f"Generating page from {from_path} to {dest_path} using {template_path}")
     print(f"Generating page  {dest_path} ")
     markdown = read_file(from_path)
@@ -383,6 +383,8 @@ def generate_page(from_path, template_path, dest_path):
         template.replace("{{ Title }}", title)
         .replace("{{ Content }}", html)
         .replace(initial_title, new_heading)
+        .replace('href="/', f"href={base_path}")
+        .replace('src="/', f"src={base_path}")
     )
 
     if os.path.exists(os.path.dirname(dest_path)):
@@ -404,9 +406,11 @@ def crawler(path):
     return all_files
 
 
-def generate_pages_recursive(dir_path_content, template_path, dest_dir_path):
+def generate_pages_recursive(
+    dir_path_content, template_path, dest_dir_path, base_path="/"
+):
     all_files = crawler(dir_path_content)
     cwd = os.getcwd()
     for file_path in all_files:
         dest_path = f"{dest_dir_path}{file_path.replace(dir_path_content, '').replace('.md', '.html')}"
-        generate_page(file_path, template_path, dest_path)
+        generate_page(file_path, template_path, dest_path, base_path)

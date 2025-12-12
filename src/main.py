@@ -1,12 +1,21 @@
 import os
 import shutil
+import sys
 
 from functions import generate_pages_recursive
 
 
 def main():
+    basepath = "/"
+    try:
+        sys.argv[1]
+        basepath = sys.argv[1]
+        print(f"base path is '{basepath}'")
+    except IndexError:
+        print("Default base path is '/'")
+
     cwd = os.getcwd()
-    public_path = f"{cwd}/public"
+    public_path = f"{cwd}/docs"
     static_path = f"{cwd}/static"
     if os.path.exists(public_path):
         shutil.rmtree(path=public_path, ignore_errors=False)
@@ -23,9 +32,9 @@ def main():
 
     from_path = f"{cwd}/content"
     template_path = f"{cwd}/template.html"
-    dest_path = f"{cwd}/public"
+    dest_path = f"{cwd}/docs"
 
-    generate_pages_recursive(from_path, template_path, dest_path)
+    generate_pages_recursive(from_path, template_path, dest_path, basepath)
 
 
 main()
