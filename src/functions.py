@@ -10,16 +10,6 @@ from htmlnode import HTMLNode, ParentNode
 from testdata import *
 from textnode import *
 
-node = TextNode(
-    "This is **text** with an _italic_ word and a `code block` and an ![obi wan image](https://i.imgur.com/fJRm4Vk.jpeg) and a [link](https://boot.dev)",
-    TextType.PLAIN,
-)
-
-node2 = TextNode(
-    "This is text with a link [to boot dev](https://www.boot.dev) and ![to youtube](https://www.youtube.com/@bootdotdev)",
-    TextType.PLAIN,
-)
-
 
 def extract_markdown_images(text):
     matches = re.findall(r"\!\[(.*?)\]\((.*?)[)]", text)
@@ -201,22 +191,6 @@ def split_nodes_link(old_nodes):
     return result
 
 
-sss = [
-    TextNode("Want to get in touch?", TextType.PLAIN, None),
-    TextNode("Contact me here", TextType.ANCHOR, "/contact"),
-    TextNode(".", TextType.PLAIN, None),
-    TextNode("This site was generated with a custom-built", TextType.PLAIN, None),
-    TextNode(
-        "static site generator",
-        TextType.ANCHOR,
-        "https://www.boot.dev/courses/build-static-site-generator-python",
-    ),
-    TextNode(" from the course on ", TextType.PLAIN, None),
-    TextNode("Boot.dev", TextType.ANCHOR, "https://www.boot.dev"),
-    TextNode(".", TextType.PLAIN, None),
-]
-
-
 def split_nodes_image(old_nodes):
     result = []
     first_d = ""
@@ -239,7 +213,7 @@ def split_nodes_image(old_nodes):
                 text = f"{text}{nodes_in.text[i]}"
             if (nodes_in.text[i] == ")") and (first_d == "!"):
                 add = True
-                if len(links) == 1:
+                if len(links) > 0:
                     result.append(
                         TextNode(links[count][0], TextType.ALT, links[count][1])
                     )
@@ -260,27 +234,6 @@ def text_to_textnodes(list_of_nodes):
     code_rm = split_nodes_code(italic_rm)
 
     return code_rm
-
-
-md = """
-    This is **bolded** paragraph
-
-    This is another paragraph with _italic_ text and `code` here
-    This is the same paragraph on a new line
-
-    - This is a list
-    - with items
-    """
-
-markdown_result = """
-    "This is **bolded** paragraph",
-
-
-    "This is another paragraph with _italic_ text and `code` here\nThis is the same paragraph on a new line",
-
-
-    "- This is a list\n-with items",
-"""
 
 
 def list_method(i, parent_tag, delimiter):
@@ -361,9 +314,9 @@ def markdown_to_html_node(markdown):
                     if len(j) > 0:
                         formated = j.replace("\n", "<br>")
                         finalstring = f"{finalstring}{formated}"
+                        finalstring = finalstring.strip()
                 children_node = text_to_children(finalstring)
                 parent_node.children = children_node
-                print(parent_node)
 
                 main.append(parent_node)
 
