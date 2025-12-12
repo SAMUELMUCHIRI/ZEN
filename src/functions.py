@@ -354,6 +354,13 @@ def extract_h2(markdown):
     return list(map(lambda x: x.strip("## "), matches))
 
 
+def extract_h3(markdown):
+    matches = re.findall(r"(?:(?<=\n)|^)###(?!#)\s+.*", markdown)
+    if len(matches) == 0:
+        return False
+    return list(map(lambda x: x.strip("### "), matches))
+
+
 def read_file(path):
     with open(path, "r") as f:
         return f.read()
@@ -371,6 +378,14 @@ def generate_page(from_path, template_path, dest_path, base_path="/"):
     template = read_file(template_path)
     html = markdown_to_html_node(markdown).to_html()
     title = extract_title(markdown)
+    h3 = extract_h3(markdown)
+
+    if h3:
+        for h3_item in h3:
+            initial_h3 = f"### {h3_item}"
+            new_h3 = f"<h3>{h3_item}</h3>"
+            html = html.replace(initial_h3, new_h3)
+
     h2 = extract_h2(markdown)
     if h2:
         for h2_item in h2:
@@ -379,6 +394,7 @@ def generate_page(from_path, template_path, dest_path, base_path="/"):
             html = html.replace(initial_h2, new_h2)
     initial_title = f"# {title}"
     new_heading = f"<h1>{title}</h1>"
+
     html = (
         template.replace("{{ Title }}", title)
         .replace("{{ Content }}", html)
