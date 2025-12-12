@@ -1,5 +1,6 @@
 import os
 from multiprocessing import Value
+from operator import ge
 from threading import ExceptHookArgs
 
 import regex as re
@@ -364,7 +365,8 @@ def write_file(path, content):
 
 
 def generate_page(from_path, template_path, dest_path):
-    print(f"Generating page from {from_path} to {dest_path} using {template_path}")
+    # print(f"Generating page from {from_path} to {dest_path} using {template_path}")
+    print(f"Generating page  {dest_path} ")
     markdown = read_file(from_path)
     template = read_file(template_path)
     html = markdown_to_html_node(markdown).to_html()
@@ -382,8 +384,29 @@ def generate_page(from_path, template_path, dest_path):
         .replace("{{ Content }}", html)
         .replace(initial_title, new_heading)
     )
+
     if os.path.exists(os.path.dirname(dest_path)):
         write_file(dest_path, html)
     else:
         os.makedirs(os.path.dirname(dest_path))
         write_file(dest_path, html)
+
+
+def crawler(path):
+    all_files = []
+
+    for entry in os.listdir(path):
+        full_path = os.path.join(path, entry)
+        if os.path.isfile(full_path):
+            all_files.append(full_path)
+        elif os.path.isdir(full_path):
+            all_files.extend(crawler(full_path))
+    return all_files
+
+
+def generate_pages_recursive(dir_path_content, template_path, dest_dir_path):
+    all_files = crawler(dir_path_content)
+    cwd = os.getcwd()
+    for file_path in all_files:
+        dest_path = f"{dest_dir_path}{file_path.replace(dir_path_content, '').replace('.md', '.html')}"
+        generate_page(file_path, template_path, dest_path)

@@ -1,7 +1,7 @@
 import os
 import shutil
 
-from functions import generate_page
+from functions import generate_pages_recursive
 
 
 def main():
@@ -21,10 +21,11 @@ def main():
         dirs_exist_ok=True,
     )
 
-    from_path = f"{cwd}/content/index.md"
+    from_path = f"{cwd}/content"
     template_path = f"{cwd}/template.html"
-    dest_path = f"{cwd}/public/index.html"
-    generate_page(from_path, template_path, dest_path)
+    dest_path = f"{cwd}/public"
+
+    generate_pages_recursive(from_path, template_path, dest_path)
 
 
 main()
