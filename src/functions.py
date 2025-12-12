@@ -372,28 +372,27 @@ def write_file(path, content):
 
 
 def generate_page(from_path, template_path, dest_path, base_path="/"):
-    # print(f"Generating page from {from_path} to {dest_path} using {template_path}")
     print(f"Generating page  {dest_path} ")
     markdown = read_file(from_path)
     template = read_file(template_path)
-    html = markdown_to_html_node(markdown).to_html()
+
     title = extract_title(markdown)
     h3 = extract_h3(markdown)
-
     if h3:
         for h3_item in h3:
             initial_h3 = f"### {h3_item}"
             new_h3 = f"<h3>{h3_item}</h3>"
-            html = html.replace(initial_h3, new_h3)
+            markdown = markdown.replace(initial_h3, new_h3)
 
     h2 = extract_h2(markdown)
     if h2:
         for h2_item in h2:
             initial_h2 = f"## {h2_item}"
             new_h2 = f"<h2>{h2_item}</h2>"
-            html = html.replace(initial_h2, new_h2)
+            markdown = markdown.replace(initial_h2, new_h2)
     initial_title = f"# {title}"
     new_heading = f"<h1>{title}</h1>"
+    html = markdown_to_html_node(markdown).to_html()
 
     html = (
         template.replace("{{ Title }}", title)
@@ -426,7 +425,7 @@ def generate_pages_recursive(
     dir_path_content, template_path, dest_dir_path, base_path="/"
 ):
     all_files = crawler(dir_path_content)
-    cwd = os.getcwd()
+
     for file_path in all_files:
         dest_path = f"{dest_dir_path}{file_path.replace(dir_path_content, '').replace('.md', '.html')}"
         generate_page(file_path, template_path, dest_path, base_path)
