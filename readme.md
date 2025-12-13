@@ -57,25 +57,25 @@ chmod +x build.sh
 <li>How it all works </li>
 
  ```bash
-+----------------------+        +----------------------+        +-----------------------------+
-|        MARKDOWN      |        |          NODES       |        |            HTML             |
-|                      |        |                      |        |                             |
-|  # Header            |        |  # Header            |        |  <html>                     |
-|                      |        |   |                  |        |    <body>                   |
-|                      |        |       |              |        |      <header>Header</header>|
-|  Paragraph           |        |   +-- Paragraph      |        |                             |
-|  - List item         | --->   |       +-- List item  | --->   |      <p>Paragraph</p>       |
-|  - List item         |        |       +-- List item  |        |                             |
-|                      |        |                      |        |      <ul>                   |
-|  [link](somewhere)   |        |  [link](somewhere)   |        |        <li>List item</li>   |
-|                      |        |                      |        |        <li>List item</li>   |
-|  ![image](something) |        |  ![image](something) |        |      </ul>                  |
-|                      |        |                      |        |                             |
-|  _italics_           |        |  _italics_           |        |      <em>italics</em>       |
-|                      |        |                      |        |                             |
-|  **bold**            |        |  **bold**            |        |      <strong>bold</strong>  |
-|                      |        |                      |        |                             |
-+----------------------+        +----------------------+        +-----------------------------+
++----------------------+      +---------------------+      +----------------------------+
+|        MARKDOWN      |      |         NODES       |      |           HTML             |
+|                      |      |                     |      |                            |
+|  # Header            |      | # Header            |      | <html>                     |
+|                      |      |  |                  |      |   <body>                   |
+|                      |      |      |              |      |     <header>Header</header>|
+|  Paragraph           |      |  +-- Paragraph      |      |                            |
+|  - List item         | ---> |      +-- List item  | ---> |     <p>Paragraph</p>       |
+|  - List item         |      |      +-- List item  |      |                            |
+|                      |      |                     |      |     <ul>                   |
+|  [link](somewhere)   |      | [link](somewhere)   |      |       <li>List item</li>   |
+|                      |      |                     |      |       <li>List item</li>   |
+|  ![image](something) |      | ![image](something) |      |     </ul>                  |
+|                      |      |                     |      |                            |
+|  _italics_           |      | _italics_           |      |     <em>italics</em>       |
+|                      |      |                     |      |                            |
+|  **bold**            |      | **bold**            |      |     <strong>bold</strong>  |
+|                      |      |                     |      |                            |
++----------------------+      +---------------------+      +----------------------------+
 
  ```
 </ol>
