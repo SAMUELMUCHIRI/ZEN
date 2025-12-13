@@ -55,7 +55,7 @@ chmod +x build.sh
 └──   test.sh # Directory structure
 ```
 <li>How it all works </li>
-![structure](./static/images/structure.png)
+![structure](https://github.com/SAMUELMUCHIRI/ZEN/blob/main/static/images/structure.png)
 </ol>
 
 ## This Repo static site is [Deployed Here](https://samuelmuchiri.github.io/ZEN/)
