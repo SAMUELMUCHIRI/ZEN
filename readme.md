@@ -55,6 +55,7 @@ chmod +x build.sh
 └──   test.sh # Directory structure
 ```
 <li>How it all works </li>
+
 ![structure](https://github.com/SAMUELMUCHIRI/ZEN/blob/main/static/images/structure.png)
 </ol>
 
